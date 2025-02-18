@@ -1,1 +1,91 @@
 @import 'tailwindcss';
+  /* Common styles for both date and time pickers */
+  .flatpickr-calendar {
+    z-index: 9999 !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    max-width: 95vw !important;
+    max-height: 95vh !important;
+    overflow: auto !important;
+    background: white !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  /* Date picker specific styles */
+  .flatpickr-calendar:not(.noCalendar) {
+    left: 90% !important;
+    min-width: 340px !important;
+
+
+  }
+
+  /* Time picker specific styles */
+  .flatpickr-calendar.noCalendar {
+    left: 50% !important;
+
+    top: 65% !important;
+    width: 100% !important;
+    min-width: 200px !important;
+    max-width: 300px !important;
+  }
+
+  .flatpickr-time {
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 0 0 8px 8px !important;
+    padding: 8px !important;
+  }
+
+  .flatpickr-time input {
+    height: 40px !important;
+    font-size: 1.1em !important;
+  }
+
+  .flatpickr-time .numInput {
+    width: 60px !important;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 640px), (max-height: 640px) {
+    /* Date picker mobile styles */
+    .flatpickr-calendar:not(.noCalendar) {
+      font-size: 14px !important;
+      padding: 10px !important;
+    }
+    
+    .flatpickr-day {
+      max-width: 32px !important;
+      height: 32px !important;
+      line-height: 32px !important;
+    }
+
+    .flatpickr-current-month {
+      font-size: 1em !important;
+    }
+
+    /* Time picker mobile styles */
+    .flatpickr-calendar.noCalendar {
+      width: 90% !important;
+      max-width: 250px !important;
+      top: 35% !important;
+    }
+
+    .flatpickr-time input {
+      height: 36px !important;
+      font-size: 1em !important;
+    }
+  }
+
+  /* Additional zoom adjustments */
+  @media (min-width: 200%) {
+    /* Date picker zoom styles */
+    .flatpickr-calendar:not(.noCalendar) {
+      transform: translate(-50%, -50%) scale(0.8) !important;
+    }
+
+    /* Time picker zoom styles */
+    .flatpickr-calendar.noCalendar {
+      transform: translate(-50%, -35%) scale(0.9) !important;
+    }
+  }

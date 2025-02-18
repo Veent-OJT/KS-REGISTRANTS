@@ -8,7 +8,7 @@ export default defineConfig({
 
 	server: {
 		host: '192.168.0.173', // Allows access from your local network
-		port: 5173, // Change this to your preferred port if needed
+		port: 4000, // Change this to your preferred port if needed
 	},
 
 	test: {

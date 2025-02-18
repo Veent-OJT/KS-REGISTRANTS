@@ -13,7 +13,6 @@
   let subject = "";
   let message = "";
   let showRecipientsList = false;
-  // let searchQuery = "";
   let scheduleDate: string;
   let scheduleTime: string;
   let timezone = "GMT+08:00 Manila";
@@ -49,9 +48,10 @@
         }
       },
       static: true,
-      disableMobile: true, // Prevent native mobile datepicker
-      position: "auto", // Better positioning
-      appendTo: datePickerElement.parentElement // Append to parent for better positioning
+      disableMobile: true,
+      position: "auto center",
+      positionElement: datePickerElement,
+      appendTo: document.body
     });
 
     flatpickr(timePickerElement, {
@@ -70,9 +70,10 @@
         }
       },
       static: true,
-      disableMobile: true, // Prevent native mobile timepicker
-      position: "auto", // Better positioning
-      appendTo: timePickerElement.parentElement // Append to parent for better positioning
+      disableMobile: true,
+      position: "auto center",
+      positionElement: timePickerElement,
+      appendTo: document.body
     });
   }
   
@@ -113,6 +114,7 @@
 
 <svelte:head>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
 </svelte:head>
 
 {#if isOpen}
@@ -178,11 +180,9 @@
                       </div>
                     </button>
                   {/each}
-                  
                 </div>
               </div>
             {/if}
-            
           </div>
         </div>
 
@@ -201,7 +201,7 @@
         {#if showSchedule}
           <div class="space-y-1.5 sm:space-y-2">
             <label class="block text-sm font-medium text-gray-700">Schedule For</label>
-            <div class="grid grid-cols-1.5 gap-2 sm:gap-3 relative">
+            <div class="grid grid-cols-2 gap-2 sm:gap-3 relative">
               <div class="relative">
                 <input
                   type="text"
@@ -221,7 +221,7 @@
                 />
               </div>
             </div>
-            <div class="flex items-center  sm:gap-1 text-xs sm:text-sm text-gray-500">
+            <div class="flex items-center sm:gap-1 text-xs sm:text-sm text-gray-500">
               <svg class="w-3 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -229,11 +229,10 @@
             </div>
           </div>
         {/if}
-        
       </div>
 
       <!-- Modal Actions -->
-      <div class="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-between gap-3">
+      <div  class="mt-6 sm:mt-8 flex flex-col sm:flex-row sm:justify-between gap-3">
         <button 
           class="w-full sm:w-auto px-4 py-2 sm:py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
           on:click={closeModal}
@@ -242,8 +241,10 @@
         </button>
         <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <button 
-            class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-[#DF4D60] text-white rounded-lg hover:bg-[#eb6d80] transition-colors text-sm font-medium flex items-center justify-center gap-2"
+          type="button"
+            class="w-full sm:w-auto cursor-pointer px-4 sm:px-6 py-2 sm:py-2.5 bg-[#DF4D60] text-white rounded-lg hover:bg-[#eb6d80] transition-colors text-sm font-medium flex items-center justify-center gap-2"
             on:click={toggleSchedule}
+
           >
             <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -251,6 +252,7 @@
             Schedule
           </button>
           <button 
+          type="button"
             class="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
             on:click={sendBlast}
           >
