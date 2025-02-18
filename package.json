@@ -19,6 +19,7 @@
 	"devDependencies": {
 		"@eslint/compat": "^1.2.5",
 		"@eslint/js": "^9.18.0",
+		"@melt-ui/svelte": "^0.86.3",
 		"@playwright/test": "^1.49.1",
 		"@sveltejs/adapter-node": "^5.2.11",
 		"@sveltejs/kit": "^2.16.0",
@@ -26,6 +27,7 @@
 		"@tailwindcss/vite": "^4.0.5",
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.4",
+		"@types/qrcode": "^1.5.5",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^2.46.1",
@@ -44,6 +46,7 @@
 	},
 	"dependencies": {
 		"@studio-freight/lenis": "^1.0.42",
+		"flatpickr": "^4.6.13",
 		"qrcode": "^1.5.4"
 	}
 }

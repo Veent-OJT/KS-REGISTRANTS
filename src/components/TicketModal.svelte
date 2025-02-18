@@ -3,15 +3,6 @@
   import QRCode from 'qrcode';
 
 
-  function disableBodyScroll() {
-  document.body.style.overflow = "hidden";
-}
-
-function enableBodyScroll() {
-  document.body.style.overflow = "";
-}
-
-
   export let isOpen = false;
   export let guest: any;
   export let onClose: () => void;

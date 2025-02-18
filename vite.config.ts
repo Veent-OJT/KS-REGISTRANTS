@@ -6,12 +6,16 @@ import { defineConfig } from 'vite';
 export default defineConfig({
 	plugins: [sveltekit(), tailwindcss()],
 
+	server: {
+		host: '192.168.0.173', // Allows access from your local network
+		port: 5173, // Change this to your preferred port if needed
+	},
+
 	test: {
 		workspace: [
 			{
 				extends: './vite.config.ts',
 				plugins: [svelteTesting()],
-
 				test: {
 					name: 'client',
 					environment: 'jsdom',
@@ -23,7 +27,6 @@ export default defineConfig({
 			},
 			{
 				extends: './vite.config.ts',
-
 				test: {
 					name: 'server',
 					environment: 'node',

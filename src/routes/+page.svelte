@@ -1,69 +1,16 @@
 <script lang="ts">
-
-  interface Event {
-    id: string;
-    title: string;
-    date: string;
-    time: string;
-    location: string;
-    url: string;
-    imageUrl: string;
-  }
-
-  interface Guest {
-    id: string;
-    name: string;
-    email: string;
-    registrationDate: string;
-    status: 'registered' | 'pending';
-    avatar: string;
-  }
-
-  function copyToClipboard() {
-    navigator.clipboard.writeText(currentEvent.url)
-      .then(() => alert('URL copied to clipboard!'))
-      .catch(err => console.error('Error copying URL:', err));
-  }
-  const currentEvent = {
-    id: '1',
-    title: 'Tech Talks 2024',
-    date: 'April 16-18, 2024',
-    time: '8:00 AM - 6:00 PM',
-    location: 'USTP Gymnasium, Cagayan de Oro City',
-    url: 'https://techtalks2024.event.co',
-    imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=2940&ixlib=rb-4.0.3'
-  };
-
-
-  const guests: Guest[] = [
-    {
-      id: '1',
-      name: 'Julia Echlin',
-      email: 'julia@email.com',
-      registrationDate: '09 Jan 2024, 8:04 AM',
-      status: 'registered',
-      avatar: 'https://ui-avatars.com/api/?name=Julia+Echlin&background=ef4444&color=fff'
-    },
-    {
-      id: '2',
-      name: 'Aaron Dave Taglinao',
-      email: 'aaron@email.com',
-      registrationDate: '10 Jan 2024, 10:15 AM',
-      status: 'registered',
-      avatar: 'https://ui-avatars.com/api/?name=Aaron+Dave&background=eab308&color=fff'
-    },
-    {
-      id: '3',
-      name: 'Erick Gallardo',
-      email: 'erick@email.com',
-      registrationDate: '12 Jan 2024, 11:00 PM',
-      status: 'pending',
-      avatar: 'https://ui-avatars.com/api/?name=Ericka+Gallardo&background=ef4444&color=fff'
-    }
-  ];
-
+  import TicketModal from '../components/TicketModal.svelte';
+  import EmailBlastModal from '../components/EmailBlastModal.svelte';
+  import { currentEvent  } from '$lib/event';
+  import { guests, type Guest } from '$lib/guests';
+  
   let searchQuery = '';
   let filteredGuests = guests;
+  let selectedGuest: Guest | null = null;
+  let isTicketModalOpen = false;
+  let isEmailBlastModalOpen = false;
+  let isMobileMenuOpen = false;
+
 
   $: {
     filteredGuests = guests.filter(guest => 
@@ -71,7 +18,30 @@
       guest.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
+
+  function openTicketModal(guest: Guest) {
+    selectedGuest = guest;
+    isTicketModalOpen = true;
+  }
+
+  function closeTicketModal() {
+    isTicketModalOpen = false;
+    selectedGuest = null;
+  }
+
+  function openEmailBlastModal() {
+    isEmailBlastModalOpen = true;
+  }
+
+  function closeEmailBlastModal() {
+    isEmailBlastModalOpen = false;
+  }
+
+  function toggleMobileMenu() {
+    isMobileMenuOpen = !isMobileMenuOpen;
+  }
 </script>
+
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
   <!-- Event Header -->
@@ -91,21 +61,22 @@
           </svg>
         </button>
       </div>
-      <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-gray-600">
+      <div class="flex flex-col gap-2 text-gray-600">
         <div class="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
           <span>{currentEvent.date}</span>
         </div>
         <div class="flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           <span class="text-sm sm:text-base">{currentEvent.location}</span>
         </div>
       </div>
+      
       <div class="mt-2 flex items-center gap-2">
         <a 
           href={currentEvent.url} 
@@ -115,27 +86,24 @@
         >
           {currentEvent.url}
         </a>
-        <button 
-          on:click={copyToClipboard} 
-          class="text-gray-500 hover:text-gray-700 transition-colors flex-shrink-0"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2M16 5V3a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2h2M9 3h6M9 7h6" />
+        <div class="flex items-center gap-2 text-gray-500 text-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
           </svg>
-        </button>
+        </div>
       </div>      
     </div>
   </div>
 
   <!-- Navigation -->
-  <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-6 sm:mb-8">
-    <nav class="flex space-x-1 min-w-max">
-      <button class="px-3 sm:px-10 py-2 text-sm sm:text-base text-white bg-indigo-600 rounded-lg">Registrants</button>
-      <button class="ml-10 px-3 sm:px-10 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 transition-colors">Posts</button>
-      <button class="ml-10 px-3 sm:px-10 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 transition-colors">Form</button>
-      <button class="ml-10 px-3 sm:px-10 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 transition-colors">Merchant</button>
-      <button class="ml-10 px-3 sm:px-10 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 transition-colors">Emails</button>
-      <button class="ml-10 px-3 sm:px-10 py-2 text-sm sm:text-base text-gray-600 hover:text-gray-900 transition-colors">Staff</button>
+  <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-6 sm:mb-8 py-3 rounded-lg">
+    <nav class="flex space-x-4 min-w-max">
+      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-white bg-[#DF4D60] border-gray-200 shadow-sm rounded-lg hover:bg-[#eb6d80] transition-colors">Registrants</button>
+      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Posts</button>
+      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Form</button>
+      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Merchant</button>
+      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Emails</button>
+      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Staff</button>
     </nav>
   </div>
 
@@ -149,8 +117,12 @@
           </svg>
           <span class="text-gray-900">Guests</span>
         </div>
-        <button class="text-indigo-600 hover:text-indigo-700 transition-colors text-sm">
-          View breakdown
+        <!-- Button to Open Modal -->
+        <button 
+          class="text-[#DF4D60] hover:text-[#eb6d80]  transition-colors text-sm"
+          on:click={openEmailBlastModal}
+        >
+          Email Blast
         </button>
       </div>
       <p class="text-3xl sm:text-4xl font-bold mt-2 text-gray-900">250</p>
@@ -179,7 +151,7 @@
         <button class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm sm:text-base">
           Download CSV
         </button>
-        <button class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm sm:text-base">
+        <button class="px-4 py-2 bg-[#DF4D60] text-white rounded-lg hover:bg-[#eb6d80] transition-colors text-sm sm:text-base">
           See full list
         </button>
       </div>
@@ -191,7 +163,7 @@
           type="text"
           placeholder="Search guests..."
           bind:value={searchQuery}
-          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pl-10 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500 text-sm sm:text-base"
+          class="w-full bg-gray-50 border border-gray-200 rounded-lg px-10 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-900 placeholder-gray-500 text-sm sm:text-base"
         />
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -213,7 +185,10 @@
 
     <div class="space-y-4">
       {#each filteredGuests as guest (guest.id)}
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors gap-4 sm:gap-0">
+        <div 
+          class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors gap-4 sm:gap-0 cursor-pointer"
+          on:click={() => openTicketModal(guest)}
+        >
           <div class="flex items-center gap-4">
             <img 
               src={guest.avatar} 
@@ -235,6 +210,7 @@
           </div>
         </div>
       {/each}
+      
     </div>
 
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
@@ -244,7 +220,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-indigo-600 text-white">1</button>
+        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#DF4D60] hover:bg-[#eb6d80] text-white">1</button>
         <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">2</button>
         <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">3</button>
         <span class="text-gray-500">...</span>
@@ -263,3 +239,14 @@
     </div>
   </div>
 </div>
+
+<TicketModal 
+  isOpen={isTicketModalOpen} 
+  guest={selectedGuest} 
+  onClose={closeTicketModal}
+/>
+
+<EmailBlastModal 
+  isOpen={isEmailBlastModalOpen}
+  closeModal={closeEmailBlastModal}
+/>
