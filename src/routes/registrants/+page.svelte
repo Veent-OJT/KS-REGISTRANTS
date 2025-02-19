@@ -1,22 +1,77 @@
 <script lang="ts">
-  import TicketModal from '../components/TicketModal.svelte';
-  import EmailBlastModal from '../components/EmailBlastModal.svelte';
-  import { currentEvent  } from '$lib/event';
+  import { activeRoute } from '$lib/stores';
+  import { goto } from '$app/navigation';
+  import TicketModal from '../../components/TicketModal.svelte';
+  import EmailBlastModal from '../../components/EmailBlastModal.svelte';
+  import { currentEvent } from '$lib/event';
   import { guests, type Guest } from '$lib/guests';
+  import { paginate } from '$lib/pagination';
   
+  // Set active route when component mounts
+  $activeRoute = 'registrants';
+
   let searchQuery = '';
-  let filteredGuests = guests;
+  let currentPage = 1;
+  let itemsPerPage = 5;
   let selectedGuest: Guest | null = null;
   let isTicketModalOpen = false;
   let isEmailBlastModalOpen = false;
   let isMobileMenuOpen = false;
+  let filteredGuests: Guest[] = [];
+  let paginatedData: {
+    items: Guest[];
+    currentPage: number;
+    totalPages: number;
+    pageNumbers: (number | string)[];
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
 
+  function navigateTo(route: string) {
+    activeRoute.set(route);
+    goto(`/${route}`);
+  }
 
   $: {
     filteredGuests = guests.filter(guest => 
       guest.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       guest.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
+    paginatedData = paginate(filteredGuests, currentPage, itemsPerPage);
+  }
+
+  function goToPage(page: number) {
+    if (page >= 1 && page <= paginatedData.totalPages) {
+      currentPage = page;
+    }
+  }
+
+  function nextPage() {
+    if (paginatedData.hasNextPage) {
+      goToPage(currentPage + 1);
+    }
+  }
+
+  function prevPage() {
+    if (paginatedData.hasPrevPage) {
+      goToPage(currentPage - 1);
+    }
+  }
+
+  function handleItemsPerPageChange(event: Event) {
+    const select = event.target as HTMLSelectElement;
+    const newItemsPerPage = parseInt(select.value);
+    
+    // Update items per page
+    itemsPerPage = newItemsPerPage;
+    
+    // Reset to first page
+    currentPage = 1;
+    
+    // Show all items if itemsPerPage matches or exceeds filtered items
+    if (newItemsPerPage >= filteredGuests.length) {
+      itemsPerPage = filteredGuests.length;
+    }
   }
 
   function openTicketModal(guest: Guest) {
@@ -36,10 +91,12 @@
   function closeEmailBlastModal() {
     isEmailBlastModalOpen = false;
   }
-
-  function toggleMobileMenu() {
-    isMobileMenuOpen = !isMobileMenuOpen;
+  function navigateToMerchant() {
+    goto('/merchant');
   }
+
+  // Computed value to determine if pagination should be shown
+  $: showPagination = filteredGuests.length > itemsPerPage;
 </script>
 
 
@@ -98,12 +155,42 @@
   <!-- Navigation -->
   <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 mb-6 sm:mb-8 py-3 rounded-lg">
     <nav class="flex space-x-4 min-w-max">
-      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-white bg-[#DF4D60] border-gray-200 shadow-sm rounded-lg hover:bg-[#eb6d80] transition-colors">Registrants</button>
-      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Posts</button>
-      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Form</button>
-      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Merchant</button>
-      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Emails</button>
-      <button class="px-4 sm:px-10 py-2 text-sm sm:text-base text-gray-600 border border-gray-200 shadow-sm rounded-lg hover:text-gray-900 transition-colors">Staff</button>
+      <button 
+        class="px-4 sm:px-10 py-2 text-sm sm:text-base {$activeRoute === 'registrants' ? 'text-white bg-[#DF4D60] hover:bg-[#eb6d80]' : 'text-gray-600 border border-gray-200 hover:text-gray-900'} shadow-sm rounded-lg transition-colors"
+        on:click={() => navigateTo('registrants')}
+      >
+        Registrants
+      </button>
+      <button 
+        class="px-4 sm:px-10 py-2 text-sm sm:text-base {$activeRoute === 'posts' ? 'text-white bg-[#DF4D60] hover:bg-[#eb6d80]' : 'text-gray-600 border border-gray-200 hover:text-gray-900'} shadow-sm rounded-lg transition-colors"
+        on:click={() => navigateTo('posts')}
+      >
+        Posts
+      </button>
+      <button 
+        class="px-4 sm:px-10 py-2 text-sm sm:text-base {$activeRoute === 'form' ? 'text-white bg-[#DF4D60] hover:bg-[#eb6d80]' : 'text-gray-600 border border-gray-200 hover:text-gray-900'} shadow-sm rounded-lg transition-colors"
+        on:click={() => navigateTo('form')}
+      >
+        Form
+      </button>
+      <button 
+        class="px-4 sm:px-10 py-2 text-sm sm:text-base {$activeRoute === 'merchant' ? 'text-white bg-[#DF4D60] hover:bg-[#eb6d80]' : 'text-gray-600 border border-gray-200 hover:text-gray-900'} shadow-sm rounded-lg transition-colors"
+        on:click={() => navigateTo('merchant')}
+      >
+        Merchant
+      </button>
+      <button 
+        class="px-4 sm:px-10 py-2 text-sm sm:text-base {$activeRoute === 'emails' ? 'text-white bg-[#DF4D60] hover:bg-[#eb6d80]' : 'text-gray-600 border border-gray-200 hover:text-gray-900'} shadow-sm rounded-lg transition-colors"
+        on:click={() => navigateTo('emails')}
+      >
+        Emails
+      </button>
+      <button 
+        class="px-4 sm:px-10 py-2 text-sm sm:text-base {$activeRoute === 'staff' ? 'text-white bg-[#DF4D60] hover:bg-[#eb6d80]' : 'text-gray-600 border border-gray-200 hover:text-gray-900'} shadow-sm rounded-lg transition-colors"
+        on:click={() => navigateTo('staff')}
+      >
+        Staff
+      </button>
     </nav>
   </div>
 
@@ -184,7 +271,7 @@
     </div>
 
     <div class="space-y-4">
-      {#each filteredGuests as guest (guest.id)}
+      {#each paginatedData.items as guest (guest.id)}
         <div 
           class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors gap-4 sm:gap-0 cursor-pointer"
           on:click={() => openTicketModal(guest)}
@@ -210,36 +297,71 @@
           </div>
         </div>
       {/each}
-      
     </div>
-
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-      <div class="flex items-center gap-2 order-2 sm:order-1">
-        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+ <!-- Pagination Controls -->
+ <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
+  <div class="flex items-center gap-4 order-2 sm:order-1">
+    {#if showPagination}
+      <div class="flex items-center gap-2">
+        <button 
+          class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          on:click={prevPage}
+          disabled={!paginatedData.hasPrevPage}
+        >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#DF4D60] hover:bg-[#eb6d80] text-white">1</button>
-        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">2</button>
-        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">3</button>
-        <span class="text-gray-500">...</span>
-        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">8</button>
-        <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+        
+        {#each paginatedData.pageNumbers as pageNum}
+          {#if typeof pageNum === 'number'}
+            <button 
+              class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors {
+                pageNum === currentPage 
+                  ? 'bg-[#DF4D60] text-white hover:bg-[#eb6d80]' 
+                  : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+              }"
+              on:click={() => goToPage(pageNum)}
+            >
+              {pageNum}
+            </button>
+          {:else}
+            <span class="text-gray-500">...</span>
+          {/if}
+        {/each}
+
+        <button 
+          class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          on:click={nextPage}
+          disabled={!paginatedData.hasNextPage}
+        >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
           </svg>
         </button>
       </div>
-      <select class="bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base order-1 sm:order-2">
-        <option value="5">5 / page</option>
-        <option value="10">10 / page</option>
-        <option value="20">20 / page</option>
-      </select>
-    </div>
+    {/if}
+    
+    <span class="text-sm text-gray-600">
+      Showing {Math.min(itemsPerPage, filteredGuests.length)} of {filteredGuests.length} items
+    </span>
+  </div>
+  <div class="flex items-center gap-2 order-1 sm:order-2">
+    <span class="text-sm text-gray-600">Items per page:</span>
+    <select 
+      class="bg-white border border-gray-200 rounded-lg px-4 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm sm:text-base"
+      on:change={handleItemsPerPageChange}
+    >
+      <option value="5">5 per page</option>
+      <option value="10">10 per page</option>
+      <option value="20">20 per page</option>
+      <option value="50">50 per page</option>
+      <option value={filteredGuests.length}>Show all</option>
+    </select>
   </div>
 </div>
-
+</div>
+</div>
 <TicketModal 
   isOpen={isTicketModalOpen} 
   guest={selectedGuest} 
